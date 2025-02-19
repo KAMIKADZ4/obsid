@@ -70,6 +70,55 @@ func main() {
 ```
 В этом случае мы `i` передаем как аргумент анонимной функции, внутри которой определена функция-замыкание, которая захватывает `ii`, и поскольку `ii` - аргумент, то в него передается передается копия значения `i` и поэтому изменения `i` не приведут к изменению в функции-замыкании
 
+Небольшие примеры замыканий с срезом и мапой:
+```go
+func main() {
+	nums := make([]int, 0, 4)
+	nums = append(nums, []int{1, 2, 3, 4}...)
+	fmt.Println("nums before foo:", nums) // [1 2 3 4]
+
+	foo := func() {
+		// у нас тут ссылка на nums
+		nums[0] = 10
+		nums = append(nums, 5) // записывание в nums расширенного списка
+		fmt.Println("nums in foo:", nums) // [10 20 3 4 5]
+	}
+
+	nums[1] = 20 // [1 20 3 4]
+	foo()
+
+	fmt.Println("nums after foo:", nums)
+}
+/*
+nums before foo: [1 2 3 4]
+nums in foo: [10 20 3 4 5]
+nums after foo: [10 20 3 4 5]
+*/
+```
+
+```go
+func main() {
+	nums := map[string]int{"Alex": 10, "Mike": 15}
+	fmt.Println("nums before foo:", nums)
+
+	foo := func() {
+		nums["Alex"] = 100
+		nums["Bob"]++
+		fmt.Println("nums in foo:", nums)
+	}
+
+	nums["Mike"] = 150
+	foo()
+
+	fmt.Println("nums after foo:", nums)
+}
+/*
+nums before foo: map[Alex: 10 Mike:1 5]
+nums in foo:     map[Alex: 100 Bob: 1 Mike: 150]
+nums after foo:  map[Alex: 100 Bob: 1 Mike: 150]
+*/
+```
+
 ## Риски использования замыканий
 **Утечка памяти**
 Если замыкание ссылается на большую локальную переменную и это замыкание сохраняется длительное время, то это локальная переменная не будет освобождена, что может привести к утечке памяти
